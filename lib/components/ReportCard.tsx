@@ -15,6 +15,8 @@ type ReportCardProps = {
     // data: ReportCardData;
     chartOptions?: object;
     draggable?: boolean;
+    width?: number;
+    height?: number;
     // refresh?: Function;
 };
 
@@ -31,13 +33,20 @@ export enum ReportCardType {
 
 const colors = ['#143059', '#2F6B9A', '#82a6c2'];
 
-function ReportCard({ title, type = ReportCardType.Number, dataHook, chartOptions = {}, draggable = false }: ReportCardProps): ReactNode {
+function ReportCard({ title, type = ReportCardType.Number, width = 250, height = 250, dataHook, chartOptions = {}, draggable = false }: ReportCardProps): ReactNode {
     const validType = Object.values(ReportCardType).toString().includes(type);
 
-    const { data, fetchData, loading } = dataHook();
+    const { data, fetchData, loading, refreshData } = dataHook();
+
+    const chartOptionsFormatted = {
+        ...chartOptions,
+        maintainAspectRatio: false
+    };
 
     useEffect(() => {
-        fetchData();
+        if (!loading) {
+            fetchData();
+        }
     }, []);
 
     const CardDetail = ({ data }: { data: ReportCardData }): ReactNode => {
@@ -66,8 +75,8 @@ function ReportCard({ title, type = ReportCardType.Number, dataHook, chartOption
                                 };
                             }) ?? []
                         }
-                        width={600}
-                        height={200}
+                        width={width}
+                        height={height}
                         random={() => 0.3}
                         fontSize={fontSizeSetter}
                         padding={2}
@@ -86,13 +95,22 @@ function ReportCard({ title, type = ReportCardType.Number, dataHook, chartOption
             default:
                 return (
                     <Chart
+                        height={height.toString()}
                         type={type}
+                        pt={{
+                            canvas: {
+                                style: {
+                                    width: width
+                                }
+                            }
+                        }}
                         data={
                             data
                                 ? {
                                       labels: data.aggregates?.map((d) => d.label),
                                       datasets: [
                                           {
+                                              label: data?.label,
                                               data: data.aggregates?.map((d) => d.value),
                                               backgroundColor: data.aggregates?.map(() => generateRandomColor())
                                           }
@@ -100,7 +118,7 @@ function ReportCard({ title, type = ReportCardType.Number, dataHook, chartOption
                                   }
                                 : {}
                         }
-                        options={chartOptions}
+                        options={chartOptionsFormatted}
                     ></Chart>
                 );
         }
@@ -108,7 +126,7 @@ function ReportCard({ title, type = ReportCardType.Number, dataHook, chartOption
 
     const Header = ({ title }: { title: string }): ReactNode => {
         const Refresh = (): ReactNode => {
-            return <Button onClick={fetchData} icon={<i className="pi pi-refresh" />} link />;
+            return <Button onClick={refreshData} icon={<i className="pi pi-refresh" />} link />;
         };
         const DragHandle = (): ReactNode => {
             return draggable ? <div>Handle</div> : null;
@@ -125,14 +143,19 @@ function ReportCard({ title, type = ReportCardType.Number, dataHook, chartOption
 
     return (
         <Card
-            pt={{
-                // body: { style: { height: '100%', minHeight: 200, maxHeight: 500, minWidth: 600, maxWidth: 800 } }
-                content: { style: { height: '100%', width: '100%', justifyContent: 'center', alignContent: 'center', alignItems: 'center' } }
-            }}
+            pt={
+                {
+                    // body: { style: { height: '100%', minHeight: 200, maxHeight: 500, minWidth: 600, maxWidth: 800 } }
+                    // content: { style: { height: '100%', width: '100%', justifyContent: 'center', alignContent: 'center', alignItems: 'center' } }
+                }
+            }
             title={<Header title={title} />}
         >
             {validType ? (
-                <div className="flex w-full h-full justify-content-center"> {loading ? <ProgressSpinner /> : <CardDetail data={data} />}</div>
+                <div className="flex w-full h-full justify-content-center" style={{ width: width, height: height }}>
+                    {' '}
+                    {loading ? <ProgressSpinner /> : <CardDetail data={data} />}
+                </div>
             ) : (
                 <div>
                     <h5>Error: Invalid Chart Type &quot;{type}&quot;</h5>

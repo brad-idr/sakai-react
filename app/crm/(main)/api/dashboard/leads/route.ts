@@ -11,6 +11,7 @@ export async function GET() {
     
     return NextResponse.json(
         {
+            label: "Leads",
             aggregates: [
                {label: "Total",  value: valid + invalid},
                {label: "Valid", value: valid},

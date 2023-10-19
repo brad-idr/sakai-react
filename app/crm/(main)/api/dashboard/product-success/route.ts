@@ -6,6 +6,7 @@ export async function GET() {
 
     return NextResponse.json(
         {
+            label: "Product Success",
             aggregates: [
                 { label: "Live Tours", value: faker.number.int({ min: 1, max: 100 }) },
                 { label: "SGT Tours", value: faker.number.int({ min: 1, max: 100 }) },

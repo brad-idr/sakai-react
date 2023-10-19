@@ -1,23 +1,8 @@
 'use client';
-import { memo, useEffect, useMemo } from 'react';
 import ReportCard from '../../../lib/components/ReportCard';
 import { useAppsAndShowingsData, useProductSuccessData, useValidLeadData, useWordCloudData } from '../../../lib/services/ReportCardService';
 
 const Dashboard = () => {
-    // const { fetchLeadData, leadData, loading: leadDataLoading } = useLeadData();
-    // const { fetchWordCloudData, wordCloudData, loading: wordCloudLoading } = useWordCloudData();
-    // const { data: productSuccessData, fetchData: fetchProductSuccessData, loading: productSuccessDataLoading } = useProductSuccessData();
-
-    // useEffect(() => {
-    //     fetchLeadData();
-    // }, [fetchLeadData]);
-
-    // useEffect(() => {
-    //     fetchWordCloudData();
-    // }, [fetchWordCloudData]);
-
-    // useEffect(fetchProductSuccessData(), [fetchProductSuccessData]);
-
     return (
         <div className="grid">
             <div className="col">
@@ -25,20 +10,21 @@ const Dashboard = () => {
                     <ReportCard
                         title={'Product Success'}
                         type={'pie'}
+                        width={440}
                         chartOptions={{
                             plugins: { legend: { position: 'left' } }
                         }}
                         dataHook={useProductSuccessData}
                     />
-                    <ReportCard title={'Word Cloud'} type={'wordCloud'} dataHook={useWordCloudData} />
-                    <ReportCard title={'Invalid Chart'} type={'blah'} dataHook={useValidLeadData} />
+                    <ReportCard title={'Word Cloud'} type={'wordCloud'} width={600} dataHook={useWordCloudData} />
+                    <ReportCard title={'Invalid Chart'} type={'test'} dataHook={useValidLeadData} />
                     <ReportCard title={'Valid Leads'} type={'pie'} dataHook={useValidLeadData} />
-                    <ReportCard title={'Valid Leads (Donut)'} type={'doughnut'} dataHook={useAppsAndShowingsData} />
-                    <ReportCard title={'Bar Chart'} type={'bar'} dataHook={useProductSuccessData} />
+                    <ReportCard title={'Apps/Showings'} type={'doughnut'} dataHook={useAppsAndShowingsData} />
+                    <ReportCard title={'Bar Chart'} width={500} type={'bar'} dataHook={useProductSuccessData} />
                 </div>
             </div>
         </div>
     );
 };
 
-export default memo(Dashboard);
+export default Dashboard;
