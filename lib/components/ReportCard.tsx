@@ -7,6 +7,8 @@ import { Wordcloud } from '@visx/wordcloud';
 import { Text } from '@visx/text';
 import { scaleLog } from '@visx/scale';
 import { type ReportCardData, UseReportDataHook, generateRandomColor } from '../services/ReportCardService';
+import { RxDragHandleDots2 } from 'react-icons/rx';
+import { ProgressBar } from 'primereact/progressbar';
 
 type ReportCardProps = {
     title: string;
@@ -28,12 +30,13 @@ export enum ReportCardType {
     PolarAreaChart = 'polarArea',
     RadarChart = 'radar',
     Number = 'number',
-    WordCloud = 'wordCloud'
+    WordCloud = 'wordCloud',
+    Percentage = 'percentage'
 }
 
 const colors = ['#143059', '#2F6B9A', '#82a6c2'];
 
-function ReportCard({ title, type = ReportCardType.Number, width = 250, height = 250, dataHook, chartOptions = {}, draggable = false }: ReportCardProps): ReactNode {
+function ReportCard({ title, type = ReportCardType.Number, width = 360, height = 240, dataHook, chartOptions = {}, draggable = true }: ReportCardProps): ReactNode {
     const validType = Object.values(ReportCardType).toString().includes(type);
 
     const { data, fetchData, loading, refreshData } = dataHook();
@@ -44,17 +47,35 @@ function ReportCard({ title, type = ReportCardType.Number, width = 250, height =
     };
 
     useEffect(() => {
-        if (!loading) {
+        if (!loading && validType) {
             fetchData();
         }
     }, []);
 
+    const calculatePercentage = (total?: number, value?: number, round: boolean = true) => {
+        console.log('total: ' + total, 'value: ' + value, 'percent: ' + (total && value ? (data?.value / data?.total) * 100 : 0));
+        return total && value ? Math.round((data?.value / data?.total) * 100) : 0;
+    };
+
     const CardDetail = ({ data }: { data: ReportCardData }): ReactNode => {
         switch (type) {
             case ReportCardType.Number:
-                return <div>Number</div>;
-            // case ReportCardType.PieChart:
-            //     return <ResponsivePie data={data?.entries ?? []} />;
+                return (
+                    <div className="flex flex-wrap align-items-center justify-content-center" style={{ height: height, width: width }}>
+                        <span className="vertical-align-middle text-8xl">{data?.value ?? 0}</span>
+                    </div>
+                );
+            case ReportCardType.Percentage:
+                return (
+                    <div className="block align-content-center justify-content-center" style={{ height: height, width: width }}>
+                        <ProgressBar className="vertical-align-middle" value={calculatePercentage(data?.total, data?.value)} />
+                        <div className="flex h-full align-items-center justify-content-center">
+                            <span className="vertical-align-middle text-7xl">{data?.value ?? 0}</span>
+                            <span className="vertical-align-middle text-3xl">&nbsp;/&nbsp;</span>
+                            <span className="vertical-align-middle text-7xl">{data?.total ?? 0}</span>
+                        </div>
+                    </div>
+                );
             case ReportCardType.WordCloud:
                 if (!data.entries?.length) {
                     return <h4>No words found</h4>;
@@ -129,14 +150,22 @@ function ReportCard({ title, type = ReportCardType.Number, width = 250, height =
             return <Button onClick={refreshData} icon={<i className="pi pi-refresh" />} link />;
         };
         const DragHandle = (): ReactNode => {
-            return draggable ? <div>Handle</div> : null;
+            return draggable ? (
+                <Button
+                    onClick={() => {
+                        console.log('dragging');
+                    }}
+                    icon={<RxDragHandleDots2 />}
+                    link
+                />
+            ) : null;
         };
 
         return (
             <div className={'flex justify-content-between'}>
+                <DragHandle />
                 <h4>{title}</h4>
                 <Refresh />
-                <DragHandle />
             </div>
         );
     };

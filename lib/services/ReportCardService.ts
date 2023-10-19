@@ -16,6 +16,8 @@ export type ReportEntry = Array<{ id: string | number; value: any }>
 export type ReportCardAggregates = Array<{ label: string; value: number }>;
 export type ReportCardData = {
     label?: string,
+    total?: number,
+    value?: number,
     aggregates?: ReportCardAggregates;
     entries?: ReportEntry;
 };
@@ -46,6 +48,8 @@ export const useValidLeadData = (): UseReportDataHook => {
     const { data: aggregateData, loading, fetchData, refreshData } = useLeadAggregateData();
     return {
         data: Object.entries(aggregateData).length ? {
+            total: aggregateData.aggregates.filter((d: {label:string}) => d.label === "Valid" || d.label === "Invalid").reduce((total: number, d: {value: number}) => total + d.value, 0),
+            value: aggregateData.aggregates.filter((d: {label:string}) => d.label === "Valid").reduce((total: number, d: {value: number}) => total + d.value, 0),
             aggregates: aggregateData.aggregates.filter((d: {label:string}) => d.label === "Valid" || d.label === "Invalid")
         } : {},
         loading,
